@@ -17,7 +17,7 @@ public class SelectionPage {
             WebElement Element = BrowserFacade.getDriver().findElement(By.cssSelector("[data-original-product-id='" + product.getProductID() + "']"));
             ((JavascriptExecutor) BrowserFacade.getDriver()).executeScript("arguments[0].scrollIntoView();", Element);
             BrowserFacade.waitForElementToAppear(By.cssSelector("[data-original-product-id='" + product.getProductID() + "']"));
-            BrowserFacade.waitForElementToClickable(By.cssSelector("[data-original-product-id='" + product.getProductID() + "']")).click();
+            Element.click();
         });
     }
 
