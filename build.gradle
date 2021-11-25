@@ -1,0 +1,103 @@
+import net.masterthought.cucumber.Configuration
+import net.masterthought.cucumber.ReportBuilder
+
+buildscript {
+
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath group: 'net.masterthought', name: 'cucumber-reporting', version: '3.5.1'
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+group 'testAutomation'
+version '1.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+//    compile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+    compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-api', version: '3.141.59'
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-support', version: '3.141.59'
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-server', version: '3.141.59'
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-firefox-driver', version: '3.141.59'
+    compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
+    compile group: 'org.apache.directory.studio', name: 'org.apache.commons.io', version: '2.4'
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-htmlunit-driver', version: '2.45.0'
+
+
+    compile group: 'info.cukes', name: 'cucumber-core', version: '1.2.5'
+    compile group: 'info.cukes', name: 'cucumber-java', version: '1.2.5'
+    compile group: 'info.cukes', name: 'cucumber-jvm', version: '1.2.5'
+    compile group: 'info.cukes', name: 'cucumber-junit', version: '1.2.5'
+    compile group: 'info.cukes', name: 'cucumber-picocontainer', version: '1.2.5'
+    compile group: 'net.masterthought', name: 'cucumber-reporting', version: '5.5.2'
+
+}
+
+def runCucumber(def browserMode, def tags) {
+    def proxy = System.getProperty("SET_PROXY", System.getenv("SET_PROXY"))
+    def argList = ['-p', "html:build/test-results/$browserMode",
+                   '-p', "json:${project.buildDir}/target/${browserMode}-cucumber.json",
+                   '--glue', 'TestSteps', 'src/test/resources/UI'
+    ]
+
+    tags.each {
+        argList << '--tags'
+        argList << it
+    }
+
+    println 'Cucumber args: ' + argList
+
+     javaexec {
+        systemProperty 'BROWSER', browserMode
+        systemProperty 'ftScreenshots', System.getProperty("ftScreenshots")
+        if (proxy) {
+            systemProperty 'SET_PROXY', proxy
+        }
+        main = "cucumber.api.cli.Main"
+        classpath = sourceSets.test.runtimeClasspath
+        args = argList
+        jvmArgs '-Xms1024m', '-Xmx4096m', '-XX:MaxMetaspaceSize=512m'
+    }
+}
+
+def generateTestReport() {
+    File reportOutputDirectory = new File("${project.buildDir}/target/reports");
+    List<String> jsonFiles = new ArrayList<>();
+    jsonFiles.addAll(fileTree("${project.buildDir}/target").filter { it.isFile() }.files.path)
+
+    String projectName = "automationReport";
+    boolean runWithJenkins = false;
+    boolean parallelTesting = false;
+
+    Configuration configuration = new Configuration(reportOutputDirectory,projectName)
+
+    // optional configuration
+    configuration.setParallelTesting(parallelTesting);
+    configuration.setRunWithJenkins(runWithJenkins);
+
+    ReportBuilder reportBuilder = new ReportBuilder(jsonFiles, configuration);
+    reportBuilder.generateReports();
+
+}
+task runAll(dependsOn: [compileTestJava]) {
+    doLast {
+        runCucumber("chrome", ["@all"])
+        generateTestReport()
+    }
+}
