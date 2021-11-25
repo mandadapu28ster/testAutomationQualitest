@@ -20,9 +20,11 @@
  ***
  Improvements:
  1. This can be improved further to support multiple browser
- 2. Can be enhanced to work in multi OS/browser combination
+ 2. Can be enhanced to work in multi OS/browser combination, instead of manul browser driver update.(run time detect OS and use driver/browsers)
  3. Can be updated for Mobile browser
- 4. Extended to support more in BrowserFacade to support wait/JS/href kind of useful methods
- 5. Can be extended to support multi thread/Fork for parallel execution.
+ 4. Can be extended to support multi thread/Fork for parallel execution.
+ 5. Can be extended to support cloud platforms like Browser stack, SauceLabs
+ 6. Extended to support more in BrowserFacade to support wait/JS/href kind of useful methods
+ 7. Can be added with additional UI test capabilities for accesability and page wise performance (HAR)
  
 # `~~**Happy Testing**~~`
